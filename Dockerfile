@@ -1,8 +1,6 @@
 FROM --platform=linux/amd64 node:18
 
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get -y install \
         ca-certificates \
         curl \
@@ -13,7 +11,6 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
         fonts-thai-tlwg \
         fonts-wqy-zenhei \
         gconf-service \
-        google-chrome-stable \
         libasound2 \
         libatk1.0-0 \
         libc6 \
