@@ -1,0 +1,40 @@
+name: Publish image
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  publish:
+    if: github.repository == 'abaines/markdown-to-pdf' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    env:
+      # A new tag per attempt, so a published tag never moves. Consumers pin the digest.
+      IMAGE_REF: ghcr.io/abaines/markdown-to-pdf:${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+      SOURCE_URL: https://github.com/abaines/markdown-to-pdf
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build image
+        run: docker build --platform linux/amd64 --label "org.opencontainers.image.source=$SOURCE_URL" --tag "$IMAGE_REF" .
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+
+      - name: Push image
+        run: docker push "$IMAGE_REF"
+
+      - name: Print digest
+        run: |
+          digest_ref="$(docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE_REF")"
+          docker pull "$digest_ref"
+          echo "$digest_ref" | tee -a "$GITHUB_STEP_SUMMARY"
