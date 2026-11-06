@@ -3,6 +3,7 @@ FROM --platform=linux/amd64 node:18@sha256:c6ae79e38498325db67193d391e6ec1d224d9
 RUN apt-get update && \
     apt-get -y install \
         ca-certificates \
+        chromium \
         curl \
         fonts-freefont-ttf \
         fonts-ipafont-gothic \
@@ -48,6 +49,10 @@ RUN apt-get update && \
         xdg-utils \
         xvfb && \
     rm -rf /var/lib/apt/lists/*
+
+# Render with Debian's open source Chromium, not a browser downloaded by Puppeteer.
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY src/*.js /
 COPY package.json /
