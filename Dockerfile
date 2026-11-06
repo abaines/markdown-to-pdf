@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:18@sha256:c6ae79e38498325db67193d391e6ec1d224d96c693a8a4d943498556716d3783
+FROM --platform=linux/amd64 node:26.12.1-bookworm@sha256:3b764117159bda01d2396391e7789b6a9106af9729cfd001ef55e98557868310
 
 RUN apt-get update && \
     apt-get -y install \
