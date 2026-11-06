@@ -55,6 +55,7 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY src/*.js /
+COPY .npmrc /
 COPY package.json /
 COPY package-lock.json /
 COPY template/ template/
