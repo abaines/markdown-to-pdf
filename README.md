@@ -2,7 +2,6 @@
 [![CI](https://github.com/BaileyJM02/markdown-to-pdf/actions/workflows/main.yml/badge.svg)](https://github.com/BaileyJM02/markdown-to-pdf/actions/workflows/main.yml)
 
 Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
-🚀 :tada: 🧪
 
 ## Notable Features:
 
@@ -10,6 +9,9 @@ Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
 - Tables
 - Images (see docs)
 - Internal and external links
+- Color emoji, typed directly or as shortcodes: 🚀 :tada: 🧪
+- Unicode text and symbols: 日本語, 中文, ไทย, العربية, → ✓ € ©
+- Pinned base image and npm packages, for more repeatable builds
 
 ## GitHub Action Inputs
 
