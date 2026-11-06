@@ -8,7 +8,6 @@ const express = require('express');
 const mustache = require('mustache');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-const request = require('request').defaults({encoding: null}); // Encoding is "null" so we can get the image correctly
 const markdownIt = require('markdown-it');
 const markdownItAnchor = require('markdown-it-anchor');
 const markdownItTOC = require('markdown-it-toc-done-right');
@@ -63,25 +62,23 @@ function GetMarkdownIt() {
 
 // encodeImage is a helper function to fetch a URL and return the image as a base64 string
 async function encodeImage(url) {
-	return new Promise((resolve, reject) => {
-		request.get(url, function(error, response, body) {
-			if(error) {
-				console.log(error);
-				
-				return resolve(null);
-			}
-			
-			if(response.statusCode !== 200) {
-				console.log('Image not found, is the image folder route correct? [' + url + ']');
-				
-				return resolve(null);
-			}
-			
-			let data = 'data:' + response.headers['content-type'].replace(' ', '') + ';base64,' + new Buffer.from(body).toString('base64');
-			
-			return resolve(data);
-		});
-	});
+	try {
+		const response = await fetch(url);
+
+		if(response.status !== 200) {
+			console.log('Image not found, is the image folder route correct? [' + url + ']');
+
+			return null;
+		}
+
+		const body = Buffer.from(await response.arrayBuffer());
+
+		return 'data:' + response.headers.get('content-type').replace(' ', '') + ';base64,' + body.toString('base64');
+	}catch(error) {
+		console.log(error);
+
+		return null;
+	}
 }
 
 const used_headers = {};
