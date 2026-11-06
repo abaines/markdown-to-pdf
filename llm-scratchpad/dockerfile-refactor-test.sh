@@ -21,6 +21,7 @@ echo "=== build candidate"
 git clone --quiet "$REPO_URL" "$SRC/repo" || exit 1
 tr -d '\r' < Dockerfile > "$SRC/repo/Dockerfile"
 tr -d '\r' < package-lock.json > "$SRC/repo/package-lock.json"
+tr -d '\r' < package.json > "$SRC/repo/package.json"
 podman build --quiet --platform linux/amd64 -t "$CANDIDATE" "$SRC/repo" 2>"$SRC/build.log" || { echo "BUILD FAILED"; tail -n 40 "$SRC/build.log"; exit 1; }
 
 echo "=== node and npm versions"
