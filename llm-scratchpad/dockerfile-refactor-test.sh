@@ -23,6 +23,11 @@ tr -d '\r' < Dockerfile > "$SRC/repo/Dockerfile"
 tr -d '\r' < package-lock.json > "$SRC/repo/package-lock.json"
 podman build --quiet --platform linux/amd64 -t "$CANDIDATE" "$SRC/repo" 2>"$SRC/build.log" || { echo "BUILD FAILED"; tail -n 40 "$SRC/build.log"; exit 1; }
 
+echo "=== node and npm versions"
+for image in "$BASE" "$CANDIDATE"; do
+    echo "$image: node $(podman run --rm --entrypoint node "$image" --version), npm $(podman run --rm --entrypoint npm "$image" --version)"
+done
+
 echo "=== installed packages and versions"
 podman run --rm --entrypoint dpkg-query "$BASE" -W -f '${Package} ${Version}\n' | sort > "$SRC/base.txt"
 podman run --rm --entrypoint dpkg-query "$CANDIDATE" -W -f '${Package} ${Version}\n' | sort > "$SRC/candidate.txt"
