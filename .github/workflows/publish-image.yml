@@ -15,7 +15,7 @@ jobs:
       packages: write
     env:
       # A new tag per attempt, so a published tag never moves. Consumers pin the digest.
-      IMAGE_REF: ghcr.io/abaines/markdown-to-pdf:${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+      IMAGE_REF: ghcr.io/abaines/markdown-to-pdf:${{ github.sha }}-run${{ github.run_id }}-attempt${{ github.run_attempt }}
       SOURCE_URL: https://github.com/abaines/markdown-to-pdf
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
