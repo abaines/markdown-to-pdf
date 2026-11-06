@@ -1,6 +1,7 @@
 #!/bin/sh
-# Renders README.md with a renderer image, the way the action does, and fails if
-# the PDF or HTML is missing or empty. Used locally and by the workflows.
+# Renders sample documents with a renderer image, the way the action does, and fails
+# if a PDF or HTML file is missing or empty, or a local image wasn't embedded.
+# Used locally and by the workflows.
 #
 # Usage: scripts/render-check.sh <engine> <image> [output_dir]
 #   engine      docker or podman, whichever built the image
@@ -15,23 +16,45 @@ OUT="${3:-generated}"
 
 cd "$(dirname "$0")/.."
 
-# Clear old results, so they can't pass the check below.
-rm -f "$OUT/README.pdf" "$OUT/README.html"
+# Usage: render <input_path> [extra container args...]
+# The trailing slash on the output folder matters: without it, the action writes to
+# generatedREADME.pdf when the folder already exists.
+render() {
+    input="$1"
+    shift
+    "$ENGINE" run --rm \
+        -v "$PWD:/github/workspace" -w /github/workspace \
+        -e INPUT_INPUT_PATH="$input" \
+        -e INPUT_OUTPUT_DIR="$OUT/" \
+        -e INPUT_BUILD_HTML=true \
+        -e INPUT_BUILD_PDF=true \
+        "$@" \
+        "$IMAGE"
+}
 
-# The trailing slash matters: without it, the action writes to generatedREADME.pdf
-# when the folder already exists.
-"$ENGINE" run --rm \
-    -v "$PWD:/github/workspace" -w /github/workspace \
-    -e INPUT_INPUT_PATH=README.md \
-    -e INPUT_OUTPUT_DIR="$OUT/" \
-    -e INPUT_BUILD_HTML=true \
-    -e INPUT_BUILD_PDF=true \
-    "$IMAGE"
-
-for file in "$OUT/README.pdf" "$OUT/README.html"; do
-    if [ ! -s "$file" ]; then
-        echo "render-check: missing or empty: $file" >&2
+check_exists() {
+    if [ ! -s "$1" ]; then
+        echo "render-check: missing or empty: $1" >&2
         exit 1
     fi
-    echo "render-check: ok: $file ($(wc -c < "$file") bytes)"
-done
+    echo "render-check: ok: $1 ($(wc -c < "$1") bytes)"
+}
+
+# Clear old results, so they can't pass the checks below.
+rm -f "$OUT/README.pdf" "$OUT/README.html" "$OUT/image-import.pdf" "$OUT/image-import.html"
+
+render README.md
+render test/fixtures/image-import.md \
+    -e INPUT_IMAGE_IMPORT=./images \
+    -e INPUT_IMAGES_DIR=test/fixtures/images
+
+check_exists "$OUT/README.pdf"
+check_exists "$OUT/README.html"
+check_exists "$OUT/image-import.pdf"
+check_exists "$OUT/image-import.html"
+
+if ! grep -q 'src="data:image/svg+xml;base64,' "$OUT/image-import.html"; then
+    echo "render-check: local image was not embedded in $OUT/image-import.html" >&2
+    exit 1
+fi
+echo "render-check: ok: local image embedded"
