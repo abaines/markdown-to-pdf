@@ -1,10 +1,11 @@
 #!/bin/sh
-# Checks that a Dockerfile edit changes nothing: builds the working tree's Dockerfile,
-# then compares its installed packages and rendered output to a baseline image.
+# Checks that a Dockerfile or lockfile edit changes nothing: builds the working tree's
+# copies of both, then compares installed packages, the npm tree and rendered output
+# to a baseline image.
 # From the repo root (out_dir is a path as WSL sees it):
 #   wsl -e sh llm-scratchpad/dockerfile-refactor-test.sh <out_dir> [baseline_image]
 #
-# Builds in a temp clone, with the Dockerfile's CRLF line endings stripped, so the
+# Builds in a temp clone, with CRLF line endings stripped from those two files, so the
 # entrypoint gets LF as it would on a GitHub runner. The clone is deleted afterwards.
 # Uses chrome-removal-sample.md and chrome-removal-render-in-container.sh.
 OUT="${1:?usage: dockerfile-refactor-test.sh <out_dir> [baseline_image]}"
@@ -19,7 +20,8 @@ trap 'rm -rf "$SRC"' EXIT
 echo "=== build candidate"
 git clone --quiet "$REPO_URL" "$SRC/repo" || exit 1
 tr -d '\r' < Dockerfile > "$SRC/repo/Dockerfile"
-podman build --quiet --platform linux/amd64 -t "$CANDIDATE" "$SRC/repo" 2>/dev/null || { echo "BUILD FAILED"; exit 1; }
+tr -d '\r' < package-lock.json > "$SRC/repo/package-lock.json"
+podman build --quiet --platform linux/amd64 -t "$CANDIDATE" "$SRC/repo" 2>"$SRC/build.log" || { echo "BUILD FAILED"; tail -n 40 "$SRC/build.log"; exit 1; }
 
 echo "=== installed packages and versions"
 podman run --rm --entrypoint dpkg-query "$BASE" -W -f '${Package} ${Version}\n' | sort > "$SRC/base.txt"
@@ -31,6 +33,17 @@ if cmp -s "$SRC/base.txt" "$SRC/candidate.txt"; then
 else
     echo "package lists: DIFFER"
     diff "$SRC/base.txt" "$SRC/candidate.txt"
+fi
+
+echo "=== npm dependency tree"
+podman run --rm --entrypoint npm "$BASE" ls --all > "$SRC/base-npm.txt" 2>&1
+podman run --rm --entrypoint npm "$CANDIDATE" ls --all > "$SRC/candidate-npm.txt" 2>&1
+wc -l < "$SRC/candidate-npm.txt" | sed 's/^/candidate npm tree lines: /'
+if cmp -s "$SRC/base-npm.txt" "$SRC/candidate-npm.txt"; then
+    echo "npm trees: identical"
+else
+    echo "npm trees: DIFFER"
+    diff "$SRC/base-npm.txt" "$SRC/candidate-npm.txt"
 fi
 
 render() {
