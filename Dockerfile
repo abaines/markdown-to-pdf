@@ -55,7 +55,7 @@ COPY package-lock.json /
 COPY template/ template/
 COPY styles/ styles/
 
-RUN npm install
+RUN npm ci
 RUN fc-cache -fv && \
     chmod +x /github_interface.js && \
     mkdir /pdf && \
