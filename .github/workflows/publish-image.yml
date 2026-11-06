@@ -25,6 +25,17 @@ jobs:
       - name: Build image
         run: docker build --platform linux/amd64 --label "org.opencontainers.image.source=$SOURCE_URL" --tag "$IMAGE_REF" .
 
+      # Test before logging in: published versions are never deleted, so a bad image must stop here.
+      - name: Render and check
+        run: sh scripts/render-check.sh docker "$IMAGE_REF"
+
+      - name: Upload render
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: render-from-new-image
+          path: generated
+
       - name: Log in to GHCR
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
