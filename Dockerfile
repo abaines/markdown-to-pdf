@@ -8,6 +8,7 @@ RUN apt-get update && \
         fonts-ipafont-gothic \
         fonts-kacst \
         fonts-liberation \
+        fonts-noto-color-emoji \
         fonts-thai-tlwg \
         fonts-wqy-zenhei \
         gconf-service \
