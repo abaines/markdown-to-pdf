@@ -11,7 +11,7 @@ const cheerio = require('cheerio');
 const markdownIt = require('markdown-it');
 const markdownItAnchor = require('markdown-it-anchor');
 const markdownItTOC = require('markdown-it-toc-done-right');
-const markdownItEmoji = require('markdown-it-emoji');
+const { full: markdownItEmoji } = require('markdown-it-emoji');
 
 function nullCoalescing(value, fallback) {
 	return value !== undefined && value !== null ? value : fallback;
