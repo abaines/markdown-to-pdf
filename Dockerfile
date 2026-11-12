@@ -9,10 +9,7 @@ RUN apt-get update && \
         fonts-liberation \
         fonts-noto-color-emoji \
         fonts-thai-tlwg \
-        fonts-wqy-zenhei \
-        libxss1 \
-        lsb-release \
-        xvfb && \
+        fonts-wqy-zenhei && \
     rm -rf /var/lib/apt/lists/*
 
 # Render with Debian's open source Chromium, not a browser downloaded by Puppeteer.
