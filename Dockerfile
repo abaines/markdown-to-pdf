@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:26.12.1-bookworm@sha256:3b764117159bda01d2396391e7789b6a9106af9729cfd001ef55e98557868310
+FROM --platform=linux/amd64 node:26.12.1-trixie@sha256:97fa0f1b59035c6072721a88d55be1371c7cb1cc942b521e1cc5c72ec87655f4
 
 RUN apt-get update && \
     apt-get -y install \
@@ -7,12 +7,10 @@ RUN apt-get update && \
         curl \
         fonts-freefont-ttf \
         fonts-ipafont-gothic \
-        fonts-kacst \
         fonts-liberation \
         fonts-noto-color-emoji \
         fonts-thai-tlwg \
         fonts-wqy-zenhei \
-        gconf-service \
         libasound2 \
         libatk1.0-0 \
         libc6 \
@@ -22,8 +20,7 @@ RUN apt-get update && \
         libexpat1 \
         libfontconfig1 \
         libgcc1 \
-        libgconf-2-4 \
-        libgdk-pixbuf2.0-0 \
+        libgdk-pixbuf-2.0-0 \
         libglib2.0-0 \
         libgtk-3-0 \
         libnspr4 \
