@@ -3,7 +3,7 @@ name: 'Markdown to PDF and HTML'
 description: 'Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.'
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/abaines/markdown-to-pdf@sha256:7b04c0417c2ebb35b6d2288ac8dc402ae1509fcc01e62f51ca97b1a4443d0be1'
+  image: 'docker://ghcr.io/abaines/markdown-to-pdf@sha256:e8be73a78108d250a625c6de9c3b685a585feb2418862b8083fdf518e581e4d2'
 
 inputs:
   input_path:
