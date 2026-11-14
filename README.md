@@ -12,6 +12,37 @@ Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
 - Unicode text and symbols: 日本語, 中文, ไทย, العربية, → ✓ € ©
 - Pinned base image and npm packages, for more repeatable builds
 
+## About This Fork
+
+This is a fork of [BaileyJM02/markdown-to-pdf](https://github.com/BaileyJM02/markdown-to-pdf).
+It takes the same inputs and produces the same outputs,
+so the documentation below still applies.
+
+What's different:
+
+- Scripts in the Markdown don't run while the PDF renders.
+  Upstream runs them, in a browser inside the action's container.
+- The action runs one prebuilt image, pinned by digest in `action.yml`,
+  so every run uses exactly the same image.
+- PDFs are rendered with Debian's open source Chromium package, not Google Chrome.
+  Upstream installs Chrome, which is proprietary,
+  and Puppeteer would otherwise download its own browser.
+- The base image and npm packages track the latest releases,
+  taking each one only once it's at least 7 days old.
+  npm packages are locked and installed with `npm ci`, with install scripts turned off.
+- The repository's workflows only run when started by hand,
+  and every action they use is pinned to a commit SHA.
+
+Things to know:
+
+- Raw HTML in the Markdown is still allowed,
+  and it can load remote images and stylesheets while the PDF renders.
+  Only convert Markdown you trust.
+- The image is frozen.
+  It gets no security updates until a new image is published and pinned.
+- Pin this action by commit SHA.
+  That also pins the image, because `action.yml` names it by digest.
+
 ## GitHub Action Inputs
 
 ### Input Path
