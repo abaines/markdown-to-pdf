@@ -58,6 +58,9 @@ The location of the folder containing your .md or .markdown files, or a path to 
 
 *Note, previous versions of this action accepted the `input_dir` input. This is still accepted as input for backwards compatibility, but passing a directory as `input_path` now carries out the same functionality.
 
+To convert the repository's root folder, pass `./`.
+A plain `.` fails the action's path check.
+
 ### Images Directory
 
 ```yaml
@@ -78,6 +81,10 @@ with:
 
 ([Path](#path))
 The location of the folder you want to place the built files.
+
+End it with a `/`, such as `pdfs/`, even though other paths shouldn't have one.
+Without it, if the folder already exists,
+the files are written next to it with the folder's name as a prefix, such as `pdfsREADME.pdf`.
 
 ### Image Import Prefix
 
