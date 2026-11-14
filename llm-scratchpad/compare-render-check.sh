@@ -1,17 +1,37 @@
 #!/bin/sh
 # Runs scripts/render-check.sh with two images, then compares their HTML output.
-# Use it for code changes, which dockerfile-refactor-test.sh doesn't pick up.
-# From the repo root:
-#   wsl -e sh llm-scratchpad/compare-render-check.sh <baseline_image> <candidate_image>
-BASE="${1:?usage: compare-render-check.sh <baseline_image> <candidate_image>}"
-CANDIDATE="${2:?usage: compare-render-check.sh <baseline_image> <candidate_image>}"
+# Use it to check whether a change to the code, Dockerfile or dependencies
+# changes what gets rendered. Results go to generated/baseline and generated/candidate.
+#
+# Usage: <engine> <baseline_image> <candidate_image>
+#   engine           docker or podman, whichever built the images
+#   baseline_image   image built before the change
+#   candidate_image  image built with the change
+set -eu
 
-mkdir -p generated/baseline generated/candidate
+USAGE="usage: $(basename "$0") <docker|podman> <baseline_image> <candidate_image>"
+ENGINE="${1:?$USAGE}"
+BASE="${2:?$USAGE}"
+CANDIDATE="${3:?$USAGE}"
+
+cd "$(dirname "$0")/.."
+
+# Usage: check <image> <side>
+# Shows only the render-check lines, or the whole log if the check fails.
+check() {
+    mkdir -p "generated/$2"
+    if ! sh scripts/render-check.sh "$ENGINE" "$1" "generated/$2" > "generated/$2.log" 2>&1; then
+        cat "generated/$2.log"
+        echo "render check failed for $2 image: $1" >&2
+        exit 1
+    fi
+    grep 'render-check:' "generated/$2.log"
+}
 
 echo "=== baseline"
-sh scripts/render-check.sh podman "$BASE" generated/baseline | grep 'render-check:' || exit 1
+check "$BASE" baseline
 echo "=== candidate"
-sh scripts/render-check.sh podman "$CANDIDATE" generated/candidate | grep 'render-check:' || exit 1
+check "$CANDIDATE" candidate
 
 echo "=== compare"
 for file in README.html image-import.html; do
