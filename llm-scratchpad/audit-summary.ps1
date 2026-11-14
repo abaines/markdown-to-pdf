@@ -4,7 +4,7 @@
 # Usage, from the repo root: .\llm-scratchpad\audit-summary.ps1 [-Image <image>]
 param([string]$Image = 'localhost/markdown-to-pdf:refactor')
 
-$raw = wsl -e sh scripts/npm-in-image.sh $Image audit --json 2>$null
+$raw = wsl -e sh scripts/npm-in-image.sh podman $Image audit --json 2>$null
 $report = ($raw -join "`n") | ConvertFrom-Json
 $vulns = $report.vulnerabilities.PSObject.Properties.Value
 
