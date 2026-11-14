@@ -167,6 +167,9 @@ class MarkdownToPDF {
 		await page.goto('data:text/html;,<h1>Not Rendered</h1>', {waitUntil: 'domcontentloaded', timeout: 2000}).catch(function (err) {
 			throw `Error while rendering page: ${err}`;
 		})
+		await page.setJavaScriptEnabled(false).catch(function (err) {
+			throw `Error while disabling JavaScript: ${err}`;
+		})
 		await page.setContent(html).catch(function (err) {
 			throw `Error while rendering page: ${err}`;
 		})
