@@ -183,6 +183,8 @@ This should be the direct path to a file, it should not be prefixed with a `/`. 
 ## Usage Examples
 
 An example of a workflow for some documentation.
+Replace each `<...>` placeholder;
+pin every action to a full commit SHA, with the release it came from in a comment.
 
 ````yml
 # .github/workflows/convert-to-pdf.yml
@@ -198,22 +200,32 @@ on:
       - 'docs/**.md'
       - 'docs/images/**'
 
+# Rendering only needs to read the repository.
+permissions:
+  contents: read
+
 jobs:
   converttopdf:
     name: Build PDF
-    runs-on: ubuntu-latest
+    # Pin an Ubuntu release rather than ubuntu-latest, so the runner doesn't change under you.
+    runs-on: ubuntu-<version>
     steps:
-      - uses: actions/checkout@v3
-      - uses: baileyjm02/markdown-to-pdf@v1
+      - uses: actions/checkout@<commit SHA> # <release>
         with:
-          input_dir: docs
-          output_dir: pdfs
+          # Don't keep the token where later steps, including the render, could read it.
+          persist-credentials: false
+      # Pinning this fork's commit also pins the image, by digest.
+      - uses: abaines/markdown-to-pdf@<commit SHA> # <fork release tag>
+        with:
+          input_path: docs
+          # Keep the trailing slash: without it, an existing folder gets files named like pdfsREADME.pdf
+          output_dir: pdfs/
           images_dir: docs/images
           # for example <img src="./images/file-name.png">
           image_import: ./images
           # Default is true, can set to false to only get PDF files
           build_html: false
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@<commit SHA> # <release>
         with:
           name: docs
           path: pdfs
