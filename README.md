@@ -249,7 +249,7 @@ The scripts in `scripts/` take the container engine as their first argument, `do
   the way the action does.
   It fails if an output is missing or empty, a local image wasn't embedded,
   or a script in the Markdown ran.
-  Both workflows run it.
+  The **Publish image** workflow runs it.
 - `compare-renders.sh <engine> <baseline_image> <candidate_image>` runs the render check with two images,
   then reports whether their HTML differs.
   Use it to see whether a change alters what gets rendered.
@@ -269,17 +269,23 @@ for example with `install <package>@<version> --package-lock-only`.
 
 ### Releasing
 
-Both workflows only run when started by hand.
+The **Publish image** workflow only runs when started by hand.
+By default it's a dry run:
+it builds an image from the commit and runs the render check,
+and separately runs the action with the image `action.yml` pins now.
+It also uploads the tested image as an artifact, kept for 2 days,
+which `docker load` or `podman load` can load locally.
 
-1. Run **Smoke test**.
-   It builds an image from the commit and runs the render check,
-   and separately runs the action with the image `action.yml` pins now.
-2. Run **Publish image** on `main`.
-   It builds the image and runs the render check before logging in,
-   because published images are never deleted.
-   Then it pushes the image under a tag unique to the run, and prints its digest in the run summary.
+With **publish** checked, a separate job pushes that same tested image to GHCR.
+That job runs in the `GitHubContainerRegistry` environment,
+a repository setting that only allows `main` and asks for approval.
+
+1. Run **Publish image** as a dry run.
+2. Run it on `main` with **publish** checked, then approve the push.
+   Published images are never deleted, so it only pushes after the render check passes.
+   It pushes under a tag unique to the run, and prints the digest in the run summary.
 3. Pin that digest in `action.yml`.
-4. Run **Smoke test** again, so the action runs with the new image.
+4. Run a dry run again, so the action runs with the new image.
 5. Tag that commit `fork-v<major>.<minor>.<patch>`.
 
 ## Contributions
