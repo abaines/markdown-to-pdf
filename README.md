@@ -10,7 +10,7 @@ Creates PDF and HTML files from Markdown using the GitHub (or custom) theme.
 - Internal and external links
 - Color emoji, typed directly or as shortcodes: 🚀 :tada: 🧪
 - Unicode text and symbols: 日本語, 中文, ไทย, العربية, → ✓ € ©
-- Pinned base image and npm packages, for more repeatable builds
+- One prebuilt image, pinned by digest, so every run renders the same way
 
 ## About This Fork
 
