@@ -239,6 +239,49 @@ jobs:
 
 ````
 
+## Developing This Fork
+
+### Scripts
+
+The scripts in `scripts/` take the container engine as their first argument, `docker` or `podman`.
+
+- `render-check.sh <engine> <image>` renders this README and the test fixtures with an image,
+  the way the action does.
+  It fails if an output is missing or empty, a local image wasn't embedded,
+  or a script in the Markdown ran.
+  Both workflows run it.
+- `compare-renders.sh <engine> <baseline_image> <candidate_image>` runs the render check with two images,
+  then reports whether their HTML differs.
+  Use it to see whether a change alters what gets rendered.
+- `npm-in-image.sh <engine> <image> <npm args...>` runs npm from a renderer image
+  against copies of the package files, then writes back whichever ones changed.
+  Use it to change dependencies without installing Node locally.
+
+### Updating Dependencies
+
+Take the latest release of the base image and of each npm package,
+once it's at least 7 days old.
+For npm, `.npmrc` enforces the wait and turns off install scripts.
+Pin the base image by digest in the `Dockerfile`.
+
+Change `package.json` and `package-lock.json` with `npm-in-image.sh`,
+for example with `install <package>@<version> --package-lock-only`.
+
+### Releasing
+
+Both workflows only run when started by hand.
+
+1. Run **Smoke test**.
+   It builds an image from the commit and runs the render check,
+   and separately runs the action with the image `action.yml` pins now.
+2. Run **Publish image** on `main`.
+   It builds the image and runs the render check before logging in,
+   because published images are never deleted.
+   Then it pushes the image under a tag unique to the run, and prints its digest in the run summary.
+3. Pin that digest in `action.yml`.
+4. Run **Smoke test** again, so the action runs with the new image.
+5. Tag that commit `fork-v<major>.<minor>.<patch>`.
+
 ## Contributions
 
 Any contributions are helpful, please make a pull-request. If you would like to discuses a new feature, please create an
