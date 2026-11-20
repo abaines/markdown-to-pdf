@@ -349,5 +349,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-# Rendered output from scripts/render-check.sh
+# Rendered output from scripts/render.sh and scripts/render-check.sh
 generated/

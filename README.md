@@ -245,6 +245,10 @@ jobs:
 
 The scripts in `scripts/` take the container engine as their first argument, `docker` or `podman`.
 
+- `render.sh <engine> <input_path> [output_dir]` renders Markdown with the image `action.yml` pins,
+  the way the action does, so a local render matches a workflow's.
+  Run it from the folder to mount as the workspace; both paths are relative to it.
+  It prints the image it used.
 - `render-check.sh <engine> <image>` renders this README and the test fixtures with an image,
   the way the action does.
   It fails if an output is missing or empty, a local image wasn't embedded,
