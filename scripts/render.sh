@@ -5,22 +5,40 @@
 # so the input and output paths are relative to it and must be inside it.
 # Prints the image it used, to compare with a workflow that pins this action.
 #
-# Usage: scripts/render.sh <engine> <input_path> [output_dir]
-#   engine      docker or podman
-#   input_path  a .md file, or a folder of them, inside the current folder
-#   output_dir  folder inside the current folder, default generated
+# Usage: scripts/render.sh [-i image] <engine> <input_path> [output_dir [container_args...]]
+#   -i image        an image to use instead of the one action.yml pins,
+#                   for example markdown-to-pdf:dev
+#   engine          docker or podman
+#   input_path      a .md file, or a folder of them, inside the current folder
+#   output_dir      folder inside the current folder, default generated
+#   container_args  passed to "<engine> run", for example -e INPUT_IMAGES_DIR=images
 set -eu
 
-USAGE="usage: render.sh <docker|podman> <input_path> [output_dir]"
+USAGE="usage: render.sh [-i image] <docker|podman> <input_path> [output_dir [container_args...]]"
+IMAGE=
+while getopts i: opt; do
+    case "$opt" in
+        i) IMAGE="$OPTARG" ;;
+        *) echo "$USAGE" >&2; exit 1 ;;
+    esac
+done
+shift $((OPTIND - 1))
+
 ENGINE="${1:?$USAGE}"
 INPUT="${2:?$USAGE}"
 OUT="${3:-generated}"
+shift 2
+if [ "$#" -gt 0 ]; then
+    shift
+fi
 
-ACTION_YML="$(dirname "$0")/../action.yml"
-IMAGE="$(sed -n "s|^ *image: *'docker://\([^']*\)'.*|\1|p" "$ACTION_YML")"
 if [ -z "$IMAGE" ]; then
-    echo "render: no docker:// image found in $ACTION_YML" >&2
-    exit 1
+    ACTION_YML="$(dirname "$0")/../action.yml"
+    IMAGE="$(sed -n "s|^ *image: *'docker://\([^']*\)'.*|\1|p" "$ACTION_YML")"
+    if [ -z "$IMAGE" ]; then
+        echo "render: no docker:// image found in $ACTION_YML" >&2
+        exit 1
+    fi
 fi
 echo "render: image $IMAGE" >&2
 
@@ -32,4 +50,5 @@ echo "render: image $IMAGE" >&2
     -e INPUT_OUTPUT_DIR="${OUT%/}/" \
     -e INPUT_BUILD_HTML=true \
     -e INPUT_BUILD_PDF=true \
+    "$@" \
     "$IMAGE"

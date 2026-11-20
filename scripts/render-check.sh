@@ -18,19 +18,10 @@ OUT="${3:-generated}"
 cd "$(dirname "$0")/.."
 
 # Usage: render <input_path> [extra container args...]
-# The trailing slash on the output folder matters: without it, the action writes to
-# generatedREADME.pdf when the folder already exists.
 render() {
     input="$1"
     shift
-    "$ENGINE" run --rm \
-        -v "$PWD:/github/workspace" -w /github/workspace \
-        -e INPUT_INPUT_PATH="$input" \
-        -e INPUT_OUTPUT_DIR="$OUT/" \
-        -e INPUT_BUILD_HTML=true \
-        -e INPUT_BUILD_PDF=true \
-        "$@" \
-        "$IMAGE"
+    sh scripts/render.sh -i "$IMAGE" "$ENGINE" "$input" "$OUT" "$@"
 }
 
 check_exists() {
